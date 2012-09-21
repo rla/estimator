@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Estimates</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-responsive.min.css">
+    <style>
+        body { padding-top: 20px; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<!-- The main template. -->
+<div id="app">
+    <!-- The template binding used for showing the actual page. -->
+    <div data-bind="template: { name: page() }" class="container-fluid"></div>
+</div>
+
+<!-- Template for the index page. -->
+<script type="text/html" id="page-index">
+    <div class="hero-unit">
+        <h1>Estimator</h1>
+        <p>Simple project schedule estimator</p>
+        <p><a href="#!/home" class="btn btn-primary btn-large">Start</a></p>
+    </div>
+    <div class="fluid-row">
+        <div class="span6">
+            <h1>Estimator</h1>
+            <p>The Estimator is a simple project for evaluating <a href="http://knockoutjs.com/">KnockoutJS</a>
+                + <a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a>. It also uses
+                <a href="http://jquery.com/">jQuery</a> as it's requirement by Bootstrap.</p>
+            <p>The app stores its data in localStorage and uses <a href="https://github.com/justaprogrammer/ObjectId.js">ObjectId</a>
+                (originally meant for usage with MongoDB) library to generate unique object id-s.</p>
+            <p>Estimator needs localStorage support and therefore works only on modern browsers.</p>
+        </div>
+        <div class="span6">
+            <h1>Links</h1>
+            <p>Some good links for getting started with KnockoutJS and Twitter Bootstrap:</p>
+            <ul>
+                <li><a href="http://knockoutjs.com/">KnockoutJS homepage</a></li>
+                <li><a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap homepage</a></li>
+                <li><a href="http://www.knockmeout.net/">KnockMeOut blog</a></li>
+            </ul>
+        </div>
+    </div>
+</script>
+
+<!-- Template for the projects page. -->
+<script type="text/html" id="page-projects">
+    <!-- ko if: projects().length == 0 -->
+        <div class="alert alert-info">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <h4>Getting started</h4>
+            Seems like you have no projects. Click on the button "Add project" to
+            get started.
+        </div>
+        <a href="#" data-bind="click: create" class="btn btn-primary">Add project</a>
+    <!-- /ko -->
+    <!-- ko if: projects().length > 0 -->
+        <div class="row-fluid">
+            <div class="span3">
+                <ul data-bind="foreach: projects" class="nav nav-tabs nav-stacked">
+                    <li data-bind="css: { active: selected() }">
+                        <a href="#" data-bind="text: name, attr: { href: '#!/project/' + oid }"></a>
+                    </li>
+                </ul>
+                <a href="#" data-bind="click: create" class="btn btn-primary">Add project</a>
+            </div>
+            <div class="span9">
+                <!-- ko if: project() -->
+                    <div data-bind="template: { name: 'project' }"></div>
+                <!-- /ko -->
+                <!-- ko if: !project() -->
+                    <div class="alert alert-info">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        <h4>Getting started</h4>
+                        Choose a project from the left menu to start adding components and tasks to it.
+                    </div>
+                <!-- /ko -->
+            </div>
+        </div>
+    <!-- /ko -->
+</script>
+
+<!-- Template for displaying a project. -->
+<script type="text/html" id="project">
+    <div data-bind="with: project()">
+        <h1 data-bind="text: name"></h1>
+        <p data-bind="text: description"></p>
+        <table class="table table-bordered">
+            <tr>
+                <th class="span2">Min (hrs)</th><td data-bind="text: totalMin"></td>
+            </tr>
+            <tr>
+                <th class="span2">Max (hrs)</th><td data-bind="text: totalMax"></td>
+            </tr>
+        </table>
+        <!-- ko if: components().length == 0 -->
+            <div class="alert alert-info">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <h4>Getting started</h4>
+                Looks like this project has no components. A component is a logical
+                unit of the project, for example, a web app could contain the following
+                components: the database, the API and the user interface.
+            </div>
+        <!-- /ko -->
+        <a href="#" data-bind="click: create" class="btn">Add component</a>
+        <a href="#" data-bind="click: edit" class="btn">Edit project</a>
+        <a href="#" data-bind="click: $parent.remove" class="btn btn-danger">Remove project</a>
+        <div data-bind="template: { name: 'component', foreach: components() }"></div>
+    </div>
+</script>
+
+<!-- Template for displaying a task. Has normal and editing mode. -->
+<script type="text/html" id="task">
+    <tr>
+        <!-- ko if: editing() -->
+            <td><input type="text" data-bind="value: name" class="input-xlarge"></td>
+            <td><input type="text" data-bind="value: min" class="input-mini"></td>
+            <td><input type="text" data-bind="value: max" class="input-mini"></td>
+            <td><a href="#" data-bind="click: save" class="btn btn-primary">Save</a></td>
+        <!-- /ko -->
+        <!-- ko if: !editing() -->
+            <td><span data-bind="text: name"></span></td>
+            <td><span data-bind="text: min"></span></td>
+            <td><span data-bind="text: max"></span></td>
+            <td>
+                <a href="#" data-bind="click: edit" class="btn">Edit</a>
+                <a href="#" data-bind="click: $parent.remove" class="btn btn-danger">Remove</a>
+            </td>
+        <!-- /ko -->
+    </tr>
+</script>
+
+<!-- Template for displaying a component. -->
+<script type="text/html" id="component">
+    <div>
+        <h2 data-bind="text: name"></h2>
+        <p data-bind="text: description"></p>
+        <!-- ko if: tasks().length == 0 -->
+            <div class="alert alert-info">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                <h4>Getting started</h4>
+                Looks like this component has no tasks. Press "Add task" to add one.
+            </div>
+        <!-- /ko -->
+        <table class="table table-bordered">
+            <tr>
+                <th>Name</th>
+                <th class="span2">Min (hrs)</th>
+                <th class="span2">Max (hrs)</th>
+                <th class="span3">Actions</th>
+            </tr>
+            <tbody data-bind="template: { name: 'task', foreach: tasks() }"></tbody>
+            <tr>
+                <th>Total</th>
+                <td data-bind="text: totalMin"></td>
+                <td data-bind="text: totalMax"></td>
+                <td></td>
+            </tr>
+        </table>
+        <a href="#" data-bind="click: create" class="btn">Add task</a>
+        <a href="#" data-bind="click: edit" class="btn">Edit component</a>
+        <a href="#" data-bind="click: $parent.remove" class="btn btn-danger">Remove component</a>
+    </div>
+</script>
+
+<!-- Template for the component form. -->
+<script type="text/html" id="component-form">
+    <div class="alert alert-info">
+        A component is a logical unit of the project, for example,
+        a web app could contain the following components: the database, the API
+        and the user interface. It could also be an activity or an aspect in
+        the project, such as testing.
+    </div>
+    <!-- ko if: error() -->
+        <p class="alert" data-bind="text: error"></p>
+    <!-- /ko -->
+    <div class="control-group" data-bind="css: { error: nameError }">
+        <label class="control-label">Name:</label>
+        <div class="controls">
+            <input type="text" data-bind="value: name">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Description:</label>
+        <div class="controls">
+            <textarea data-bind="value: description" rows="5" class="input-xlarge"></textarea>
+        </div>
+    </div>
+</script>
+
+<!-- Template for the project form. -->
+<script type="text/html" id="project-form">
+    <div class="alert alert-info">
+        A project has name and description. Description can be
+        left empty.
+    </div>
+    <!-- ko if: error() -->
+        <p class="alert" data-bind="text: error"></p>
+    <!-- /ko -->
+    <div class="control-group" data-bind="css: { error: nameError }">
+        <label class="control-label">Name:</label>
+        <div class="controls">
+            <input type="text" data-bind="value: name">
+        </div>
+    </div>
+    <div class="control-group">
+        <label class="control-label">Description:</label>
+        <div class="controls">
+            <textarea data-bind="value: description" rows="5" class="input-xlarge"></textarea>
+        </div>
+    </div>
+</script>
+
+<!-- Generic template for dialogs. -->
+<div class="modal hide fade" id="dialog">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 data-bind="text: title"></h3>
+    </div>
+    <!-- The actual form is shown by the template binding. -->
+    <div data-bind="template: { name: template }" class="modal-body"></div>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-bind="click: cancel">Close</a>
+        <a href="#" class="btn btn-primary" data-bind="click: save">Save changes</a>
+    </div>
+</div>
+
+<!-- Template for confirmation dialogs. -->
+<div class="modal hide fade" id="confirm">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 data-bind="text: title"></h3>
+    </div>
+    <p data-bind="text: message" class="modal-body"></p>
+    <div class="modal-footer">
+        <a href="#" class="btn" data-bind="click: no">No</a>
+        <a href="#" class="btn btn-primary" data-bind="click: yes">Yes</a>
+    </div>
+</div>
+
+<!-- Loads libraries and the app code. -->
+<script src="js/jquery-1.8.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/knockout-2.1.0.js"></script>
+<script src="js/Objectid.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
