@@ -15,13 +15,11 @@ Estimator needs localStorage support and therefore works only on modern browsers
 Demo
 ----
 
-Demo can be found here: [https://infdot.com/estimator/](https://infdot.com/estimator/).
+Demo can be found here: [http://demos.rlaanemets.com/estimator/](http://demos.rlaanemets.com/estimator/).
 
 Documentation
 -------------
 
 Follow the blue informational text boxes.
 
-Source (JS part) code documentation in docco format: [https://infdot.com/estimator/doc/app.html](https://infdot.com/estimator/doc/app.html).
-
-
+Source (JS part) code documentation in docco format: [http://demos.rlaanemets.com/estimator/doc/app.html](http://demos.rlaanemets.com/estimator/doc/app.html).
